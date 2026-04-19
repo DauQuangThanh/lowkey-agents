@@ -1,6 +1,12 @@
 # Agent Team Execution Order
 
-> This document defines the correct execution sequence for the 14 subagents in the lowkey-agents project. It maps the dependency graph, input/output directories, interaction modes, and hand-off rules.
+> This document defines the correct execution sequence for the 14 subagents in the lowkey-agents project. It maps the dependency graph, input/output directories, dual-mode capability status, and hand-off rules.
+
+## Current Capability Status
+
+- 14/14 agents support both interactive mode and auto mode (`--auto` / `-Auto`)
+- 14/14 workflow skills include both orchestrators: `run-all.sh` and `run-all.ps1`
+- 85 total skill directories are available across the full team capability set
 
 ---
 
@@ -73,63 +79,70 @@ Every phase script writes a `.extract` companion next to its markdown output —
 
 ## Dependency Graph
 
-```
-                    ┌──────────────────┐
-                    │ business-analyst │  (interactive)
-                    │   → ba-output/   │
-                    └────────┬─────────┘
-                             │
-                    ┌────────▼─────────┐
-                    │    architect     │  (interactive)
-                    │  → arch-output/  │
-                    └────────┬─────────┘
-                             │
-          ┌──────────────────┼──────────────────────────┐
-          │                  │                           │
-┌─────────▼──────┐ ┌────────▼─────────┐  ┌─────────────▼────────┐
-│  ux-designer   │ │    developer     │  │       devops         │
-│ (interactive)  │ │  (automated)     │  │   (interactive)      │
-│ → ux-output/   │ │  → dev-output/   │  │   → ops-output/      │
-└─────────┬──────┘ └────────┬─────────┘  └──────────────────────┘
-          │                  │
-          │  (dev reads      │
-          │   ux-output/)    │
-          └────────►─────────┤
-                             │
-     ┌───────────────────────┼───────────────────┐
-     │                       │                   │
-┌────▼──────────┐  ┌────────▼──────┐  ┌─────────▼──────────┐
-│project-manager│  │test-architect │  │  product-owner     │
-│ (automated)   │  │ (automated)   │  │  (automated)       │
-│ → pm-output/  │  │ → ta-output/  │  │  → po-output/      │
-└───────────────┘  └────────┬──────┘  └─────────┬──────────┘
-                            │                   │
-                   ┌────────▼──────┐  ┌─────────▼──────────┐
-                   │    tester     │  │   scrum-master     │
-                   │ (automated)   │  │   (automated)      │
-                   │→ test-output/ │  │   → sm-output/     │
-                   └───────────────┘  └────────────────────┘
-                            │
-          ┌─────────────────┤
-          │                 │
-┌─────────▼──────────┐ ┌───▼─────────────────────┐
-│code-quality-reviewer│ │code-security-reviewer   │
-│ (automated)         │ │ (automated)             │
-│ → cqr-output/       │ │ → csr-output/           │
-└─────────────────────┘ └─────────────────────────┘
+### Primary Delivery Flow
 
-[Standalone / any time after code exists]
-┌──────────────────────┐
-│  technical-analyst   │  (automated, reads source code)
-│    → re-output/      │
-└──────────────────────┘
+```mermaid
+flowchart TD
+  BA[business-analyst<br/>dual-mode<br/>ba-output/] --> ARCH[architect<br/>dual-mode<br/>arch-output/]
+
+  ARCH --> UX[ux-designer<br/>dual-mode<br/>ux-output/]
+  ARCH --> DEV[developer<br/>dual-mode<br/>dev-output/]
+  ARCH --> OPS[devops<br/>dual-mode<br/>ops-output/]
+  BA --> UX
+  BA --> DEV
+  BA --> OPS
+  UX -->|developer reads ux-output/| DEV
+
+  BA --> PM[project-manager<br/>dual-mode<br/>pm-output/]
+  BA --> TA[test-architect<br/>dual-mode<br/>ta-output/]
+
+  BA --> PO[product-owner<br/>dual-mode<br/>po-output/]
+  PO --> SM[scrum-master<br/>dual-mode<br/>sm-output/]
+  BA --> SM
+
+  DEV --> TEST[tester<br/>dual-mode<br/>test-output/]
+  TA --> TEST
+  ARCH --> TEST
+  BA --> TEST
+
+  DEV --> CQR[code-quality-reviewer<br/>dual-mode<br/>cqr-output/]
+  ARCH --> CQR
+
+  DEV --> CSR[code-security-reviewer<br/>dual-mode<br/>csr-output/]
+  ARCH --> CSR
+```
+
+### Standalone Reverse Engineering
+
+```mermaid
+flowchart LR
+  SRC[(Actual Source Code)] --> RE[technical-analyst<br/>dual-mode<br/>re-output/]
+```
+
+### Bug-Fixer Feedback Loop
+
+```mermaid
+flowchart LR
+  TEST[test-output/bugs.md] --> BF[bug-fixer<br/>dual-mode<br/>bf-output/ + source patches]
+  CQR[cqr-output/*] --> BF
+  CSR[csr-output/*] --> BF
+  CODE[(Source Code)] --> BF
+  BF --> CHANGE[bf-output/04-change-register.md]
+  BF --> IMPACT[bf-output/05-upstream-impact.md]
+  CHANGE --> TEST
+  CHANGE --> CQR
+  CHANGE --> CSR
+  IMPACT --> BA2[business-analyst]
+  IMPACT --> ARCH2[architect]
+  IMPACT --> DEV2[developer]
+  IMPACT --> UX2[ux-designer]
 ```
 
 ---
 
 ## Execution Phases
 
-### Phase 1 — Foundation (Sequential, Interactive)
+### Phase 1 — Foundation (Sequential)
 
 | Step | Agent | Reads From | Produces | Est. Time |
 |------|-------|-----------|----------|-----------|
@@ -138,7 +151,7 @@ Every phase script writes a `.extract` companion next to its markdown output —
 
 **Gate:** Both `ba-output/REQUIREMENTS-FINAL.md` and `arch-output/ARCHITECTURE-FINAL.md` must exist before proceeding.
 
-### Phase 2 — Parallel Design (Interactive + Automated)
+### Phase 2 — Parallel Design
 
 | Step | Agent | Reads From | Produces | Est. Time |
 |------|-------|-----------|----------|-----------|
@@ -152,7 +165,7 @@ Every phase script writes a `.extract` companion next to its markdown output —
 
 **Gate:** `dev-output/DEVELOPER-FINAL.md` must exist before Phase 3.
 
-### Phase 3 — Delivery Planning (Automated)
+### Phase 3 — Delivery Planning
 
 | Step | Agent | Reads From | Produces | Est. Time |
 |------|-------|-----------|----------|-----------|
@@ -161,7 +174,7 @@ Every phase script writes a `.extract` companion next to its markdown output —
 
 **Ordering Rule:** product-owner MUST complete before scrum-master, because scrum-master reads `po-output/01-product-backlog.md` and `po-output/02-acceptance-criteria.md`.
 
-### Phase 4 — Quality Assurance (Automated, Parallelizable)
+### Phase 4 — Quality Assurance (Parallelizable)
 
 | Step | Agent | Reads From | Produces | Est. Time |
 |------|-------|-----------|----------|-----------|
@@ -186,6 +199,12 @@ All three can run in parallel.
 | 6.1 | **bug-fixer** | `test-output/bugs.md`, `cqr-output/05-cq-debts.md`, `csr-output/*.md` + actual source code | `bf-output/` + code patches on a fix branch | 30 min – 2 hours per batch |
 
 **Note:** This is the only agent that **modifies source code** (not just its output dir). It always works on a fix branch and never pushes. Its `05-upstream-impact.md` feeds back to BA / architect / developer / UX; its `04-change-register.md` + the modified source feed downstream to CQR / CSR / tester for re-review.
+
+## Mode Guidance by Phase
+
+- All phases can run in either interactive mode (human-driven) or auto mode (orchestrator-driven).
+- For team orchestration and CI/CD, prefer auto mode to ensure deterministic hand-offs across agents.
+- For discovery-heavy early planning, interactive mode is often preferred for Foundation and Design phases.
 
 ---
 
