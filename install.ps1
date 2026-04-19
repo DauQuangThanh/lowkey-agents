@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 #
 # lowkey-agents installer (PowerShell 5.1+, Windows/Cross-platform)
-# Installs 13 agents and 79 skills to 25+ AI coding platforms
+# Installs 14 agents and 85 skills to 25+ AI coding platforms
 #
 # Usage:
 #   .\install.ps1                          # Interactive mode
@@ -79,7 +79,7 @@ function Write-Banner {
     Write-Host ""
     Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
     Write-Host "║           LOWKEY-AGENTS INSTALLER                      ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   14 Agents + 79 Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   14 Agents + 85 Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Developed by Dau Quang Thanh                         ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Version 2.0 — Production Ready                       ║" -ForegroundColor $Colors['Cyan']
     Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
@@ -132,7 +132,7 @@ SUPPORTED PLATFORMS (25 total):
   - Trae (.trae\)
   - Windsurf (.windsurf\)
 
-If none detected, you'll be prompted to choose or default to .claude\
+If none detected, installer defaults to .claude\ and asks for confirmation
 "@
     Write-Host $helpText
 }
@@ -196,6 +196,18 @@ function Get-TargetPath {
 
     Write-Success "Target path: $Target"
     return $Target
+}
+
+function Confirm-DefaultClaudeInstall {
+    if ($Force) {
+        return $true
+    }
+
+    Write-Host ""
+    Write-Warning-Custom "No supported IDE/agent folder detected."
+    Write-Host "Installer will use .claude\ as default target." -ForegroundColor White
+    $response = Read-Host "Continue with .claude\? (y/n)"
+    return $response -match "^[yY]"
 }
 
 function Find-IDEDirs {
@@ -527,10 +539,13 @@ function Main {
     $ideDirs = Find-IDEDirs $targetPath
 
     if ($ideDirs.Count -eq 0) {
-        # No IDE directories found — let user choose one to create
-        $chosen = Choose-IDEDir
-        $ideDirs = @($chosen)
-        Write-Info "Will create $chosen\ directory"
+        # No IDE directories found — default to .claude\ after explicit confirmation
+        if (-not (Confirm-DefaultClaudeInstall)) {
+            Write-Warning-Custom "Installation cancelled"
+            exit 0
+        }
+        $ideDirs = @('.claude')
+        Write-Info "Will create .claude\ directory"
     }
     else {
         Write-Host ""

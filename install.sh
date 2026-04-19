@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # lowkey-agents installer (Bash 3.2+, macOS/Linux)
-# Installs 13 agents and 79 skills to 25+ AI coding platforms
+# Installs 14 agents and 85 skills to 25+ AI coding platforms
 #
 # Usage:
 #   ./install.sh                          # Interactive mode
@@ -79,7 +79,7 @@ print_banner() {
     printf "\n${BOLD}${CYAN}"
     printf "╔════════════════════════════════════════════════════════╗\n"
     printf "║           LOWKEY-AGENTS INSTALLER                      ║\n"
-    printf "║   14 Agents + 79 Skills for 25+ AI Coding Platforms    ║\n"
+    printf "║   14 Agents + 85 Skills for 25+ AI Coding Platforms    ║\n"
     printf "║   Developed by Dau Quang Thanh                         ║\n"
     printf "║   Version 2.0 — Production Ready                       ║\n"
     printf "╚════════════════════════════════════════════════════════╝\n"
@@ -132,7 +132,7 @@ SUPPORTED PLATFORMS (25 total):
   - Trae (.trae/)
   - Windsurf (.windsurf/)
 
-If none detected, you'll be prompted to choose or default to .claude/
+If none detected, installer defaults to .claude/ and asks for confirmation
 
 EOF
 }
@@ -235,54 +235,21 @@ find_ide_dirs() {
     echo "${found_dirs[@]}"
 }
 
-# Ask user which IDE/framework to use
-choose_ide_dir() {
+# Confirm default .claude installation when no IDE/framework dir is detected
+confirm_default_claude_install() {
     if [[ $FORCE_MODE -eq 1 ]]; then
-        echo ".claude"
-        return
+        return 0
     fi
 
-    printf "\n${BOLD}No IDE framework directory detected${NC}\n"
-    printf "Which framework would you like to use?\n\n"
-    printf "  ${CYAN}Popular Platforms:${NC}\n"
-    printf "  ${CYAN}1${NC}) .claude/     (Claude Code - recommended)\n"
-    printf "  ${CYAN}2${NC}) .cursor/     (Cursor)\n"
-    printf "  ${CYAN}3${NC}) .windsurf/   (Windsurf)\n"
-    printf "  ${CYAN}4${NC}) .github/     (GitHub Copilot IDE)\n"
-    printf "  ${CYAN}5${NC}) .copilot/    (GitHub Copilot CLI)\n"
-    printf "  ${CYAN}6${NC}) .cline/      (Cline)\n"
-    printf "  ${CYAN}7${NC}) .roo/        (Roo Code)\n"
-    printf "  ${CYAN}8${NC}) .opencode/   (opencode)\n\n"
-    printf "  ${CYAN}More Platforms:${NC}\n"
-    printf "  ${CYAN}9${NC}) .codex/      (Codex CLI)\n"
-    printf "  ${CYAN}10${NC}) .gemini/     (Gemini CLI)\n"
-    printf "  ${CYAN}11${NC}) .amp/        (Amp)\n"
-    printf "  ${CYAN}12${NC}) .augment/    (Augment Code)\n"
-    printf "  ${CYAN}13${NC}) .agent/      (Antigravity)\n"
-    printf "  ${CYAN}14${NC}) .bob/        (IBM Bob)\n"
-    printf "  ${CYAN}15${NC}) .codebuddy/  (CodeBuddy)\n"
-    printf "  ${CYAN}16${NC}) .forge/      (Forge)\n"
-    printf "  ${CYAN}17${NC}) .junie/      (Junie)\n"
-    printf "  ${CYAN}18${NC}) .kilocode/   (Kilo Code)\n"
-    printf "  ${CYAN}19${NC}) .kiro/       (Kiro)\n"
-    printf "  ${CYAN}20${NC}) .omp/        (Pi Agent)\n"
-    printf "  ${CYAN}21${NC}) .qoder/      (Qoder)\n"
-    printf "  ${CYAN}22${NC}) .qwen/       (Qwen Code)\n"
-    printf "  ${CYAN}23${NC}) .tabnine/    (Tabnine)\n"
-    printf "  ${CYAN}24${NC}) .trae/       (Trae)\n"
-    printf "  ${CYAN}25${NC}) .vibe/       (Mistral Vibe)\n\n"
+    printf "\n${YELLOW}No supported IDE/agent folder detected.${NC}\n"
+    printf "Installer will use ${CYAN}.claude/${NC} as default target.\n"
+    printf "Continue with ${CYAN}.claude/${NC}? (y/n) "
+    read -r confirm
 
-    read -p "Choose (1-25, default=1): " choice
-    choice="${choice:-1}"
-
-    # Map choice to platform entry
-    local idx=$((choice - 1))
-    if [[ $idx -ge 0 ]] && [[ $idx -lt ${#PLATFORMS[@]} ]]; then
-        local platform_entry="${PLATFORMS[$idx]}"
-        echo "${platform_entry%%:*}"
-    else
-        echo ".claude"
-    fi
+    case "$confirm" in
+        [yY][eE][sS]|[yY]) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
 # Show installation summary
@@ -554,10 +521,13 @@ main() {
     local ide_dirs=($ide_dirs_str)
 
     if [[ ${#ide_dirs[@]} -eq 0 ]]; then
-        # No IDE directories found — let user choose one to create
-        local chosen=$(choose_ide_dir)
-        ide_dirs=("$chosen")
-        print_info "Will create $chosen/ directory"
+        # No IDE directories found — default to .claude/ after explicit confirmation
+        if ! confirm_default_claude_install; then
+            print_warning "Installation cancelled"
+            exit 0
+        fi
+        ide_dirs=(".claude")
+        print_info "Will create .claude/ directory"
     else
         printf "\n${BOLD}Detected IDE frameworks:${NC}\n"
         for dir in "${ide_dirs[@]}"; do

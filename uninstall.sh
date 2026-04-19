@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # lowkey-agents uninstaller (Bash 3.2+, macOS/Linux)
-# Removes 13 agents and 79 skills from 25+ AI coding platforms
+# Removes 14 agents and 85 skills from 25+ AI coding platforms
 #
 # Usage:
 #   ./uninstall.sh                          # Interactive mode
@@ -72,7 +72,7 @@ print_banner() {
     printf "\n${BOLD}${CYAN}"
     printf "╔════════════════════════════════════════════════════════╗\n"
     printf "║         LOWKEY-AGENTS UNINSTALLER                      ║\n"
-    printf "║   Remove 14 Agents + 79 Skills from 25+ AI Platforms   ║\n"
+    printf "║   Remove 14 Agents + 85 Skills from 25+ AI Platforms   ║\n"
     printf "║   Developed by Dau Quang Thanh                         ║\n"
     printf "║   Version 2.0 — Production Ready                       ║\n"
     printf "╚════════════════════════════════════════════════════════╝\n"
