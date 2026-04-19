@@ -4,7 +4,7 @@ A complete **software project team** implemented as 14 portable agent definition
 
 Every agent is backed by **Agent Skills** with cross-platform Bash and PowerShell scripts. The agents are **IDE-agnostic** and can be installed into any project that supports agent definitions (Claude Code, Windsurf, Cursor, OpenCode, Cline, Roo Code, and others).
 
-**Status:** 14/14 agents run end-to-end in `--auto` mode via their `run-all.{sh,ps1}` orchestrator. See [INTEGRATION-TEST-REPORT.md](INTEGRATION-TEST-REPORT.md) for the full verification against a live scenario.
+**Status:** 14/14 agents run end-to-end in `--auto` mode via their `run-all.{sh,ps1}` orchestrator.
 
 ---
 
@@ -94,7 +94,7 @@ See **[AGENT-TEAM-EXECUTION-ORDER.md](AGENT-TEAM-EXECUTION-ORDER.md)** for the f
 - **IDE-agnostic** — works with Claude Code, Windsurf, Cursor, OpenCode, Cline, Roo Code, and others
 - **One-click install** — cross-platform installer scripts with auto-detection
 - **Dual-mode** — every agent supports interactive (human-driven) AND auto mode (orchestrator/CI-driven) via `--auto` / `-Auto`
-- **End-to-end verified** — all 14 agents run cleanly via their `run-all.{sh,ps1}` orchestrator in auto mode and produce a FINAL deliverable ([integration test report](INTEGRATION-TEST-REPORT.md))
+- **End-to-end verified** — all 14 agents run cleanly via their `run-all.{sh,ps1}` orchestrator in auto mode
 - **Answer sources** — env vars, `--answers FILE`, upstream `.extract` files, documented defaults (in that priority)
 - **One-question-at-a-time** conversational flow for interactive agents; numbered choices, plain language
 - **Cross-platform scripts** — Bash 3.2+ (macOS/Linux) and PowerShell 5.1+ (Windows), with behavioural parity between the two
@@ -113,7 +113,6 @@ See **[AGENT-TEAM-EXECUTION-ORDER.md](AGENT-TEAM-EXECUTION-ORDER.md)** for the f
 lowkey-agents/
 ├── README.md                        # This file
 ├── AGENT-TEAM-EXECUTION-ORDER.md    # Dependency graph & execution sequence
-├── INTEGRATION-TEST-REPORT.md       # End-to-end pipeline verification report
 ├── CLAUDE.md                        # Project notes
 ├── install.sh / install.ps1         # Installer (Bash / PowerShell)
 ├── uninstall.sh / uninstall.ps1     # Uninstaller (Bash / PowerShell)
