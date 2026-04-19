@@ -1,0 +1,34 @@
+# macOS
+.DS_Store
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Shell and PowerShell logs/temp
+*.log
+*.tmp
+*.bak
+
+# Environment files
+.env
+.env.*
+
+# Python cache (if tooling scripts use Python)
+__pycache__/
+*.py[cod]
+
+# Node/npm artifacts (if local tooling is used)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage/output artifacts
+coverage/
+dist/
+build/
