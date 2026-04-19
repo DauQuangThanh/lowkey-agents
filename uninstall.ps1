@@ -78,12 +78,12 @@ $Colors = @{
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
-    Write-Host "║         LOWKEY-AGENTS UNINSTALLER.                       ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Remove 12+ Agents + 80+ Skills from 25+ AI Platforms   ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Developed by Dau Quang Thanh                           ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Version 2.0 — Production Ready                         ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
+    Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
+    Write-Host "║         LOWKEY-AGENTS UNINSTALLER.                     ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Remove 14 Agents + 79 Skills from 25+ AI Platforms   ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Developed by Dau Quang Thanh                         ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Version 2.0 — Production Ready                       ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
     Write-Host ""
 }
 

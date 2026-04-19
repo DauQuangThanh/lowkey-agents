@@ -77,12 +77,12 @@ readonly PLATFORMS=(
 # Colors and formatting functions
 print_banner() {
     printf "\n${BOLD}${CYAN}"
-    printf "╔══════════════════════════════════════════════════════════╗\n"
-    printf "║           LOWKEY-AGENTS INSTALLER                        ║\n"
-    printf "║   12+ Agents + 80+ Skills for 25+ AI Coding Platforms    ║\n"
-    printf "║   Developed by Dau Quang Thanh                           ║\n"
-    printf "║   Version 2.0 — Production Ready                         ║\n"
-    printf "╚══════════════════════════════════════════════════════════╝\n"
+    printf "╔════════════════════════════════════════════════════════╗\n"
+    printf "║           LOWKEY-AGENTS INSTALLER                      ║\n"
+    printf "║   14 Agents + 79 Skills for 25+ AI Coding Platforms    ║\n"
+    printf "║   Developed by Dau Quang Thanh                         ║\n"
+    printf "║   Version 2.0 — Production Ready                       ║\n"
+    printf "╚════════════════════════════════════════════════════════╝\n"
     printf "${NC}\n"
 }
 

@@ -70,12 +70,12 @@ readonly PLATFORMS=(
 
 print_banner() {
     printf "\n${BOLD}${CYAN}"
-    printf "╔══════════════════════════════════════════════════════════╗\n"
-    printf "║         LOWKEY-AGENTS UNINSTALLER                        ║\n"
-    printf "║   Remove 12+ Agents + 80+ Skills from 25+ AI Platforms   ║\n"
-    printf "║   Developed by Dau Quang Thanh                           ║\n"
-    printf "║   Version 2.0 — Production Ready                         ║\n"
-    printf "╚══════════════════════════════════════════════════════════╝\n"
+    printf "╔════════════════════════════════════════════════════════╗\n"
+    printf "║         LOWKEY-AGENTS UNINSTALLER                      ║\n"
+    printf "║   Remove 14 Agents + 79 Skills from 25+ AI Platforms   ║\n"
+    printf "║   Developed by Dau Quang Thanh                         ║\n"
+    printf "║   Version 2.0 — Production Ready                       ║\n"
+    printf "╚════════════════════════════════════════════════════════╝\n"
     printf "${NC}\n"
 }
 

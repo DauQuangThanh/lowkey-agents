@@ -77,12 +77,12 @@ $Colors = @{
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
-    Write-Host "║           LOWKEY-AGENTS INSTALLER                        ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   12+ Agents + 80+ Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Developed by Dau Quang Thanh                           ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Version 2.0 — Production Ready                         ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
+    Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
+    Write-Host "║           LOWKEY-AGENTS INSTALLER                      ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   14 Agents + 79 Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Developed by Dau Quang Thanh                         ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Version 2.0 — Production Ready                       ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
     Write-Host ""
 }
 

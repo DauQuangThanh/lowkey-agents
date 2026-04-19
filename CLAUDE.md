@@ -9,11 +9,34 @@
 
 ## Structure
 
-- `agents/` — 13 agent definition files (.md)
+- `agents/` — 14 agent definition files (.md)
 - `skills/` — 79 skill directories, each with SKILL.md + scripts/
-- `install.sh` / `install.ps1` — Cross-platform installer
-- `uninstall.sh` / `uninstall.ps1` — Cross-platform uninstaller
 - `AGENT-TEAM-EXECUTION-ORDER.md` — Dependency graph and execution sequence
+
+---
+
+## Agent Inventory Mapping (Folder/File Convention)
+
+Because each project can use different folder layouts and naming conventions, use the mapping below as the default reference and adapt paths as needed in your target repository.
+
+| Agent | Agent Definition File | Primary Workflow Skill Folder | Typical Output Folder |
+|---|---|---|---|
+| business-analyst | `agents/business-analyst.md` | `skills/ba-workflow/` | `ba-output/` |
+| architect | `agents/architect.md` | `skills/architecture-workflow/` | `arch-output/` |
+| ux-designer | `agents/ux-designer.md` | `skills/ux-workflow/` | `ux-output/` |
+| developer | `agents/developer.md` | `skills/dev-workflow/` | `dev-output/` |
+| devops | `agents/devops.md` | `skills/ops-workflow/` | `ops-output/` |
+| project-manager | `agents/project-manager.md` | `skills/pm-workflow/` | `pm-output/` |
+| product-owner | `agents/product-owner.md` | `skills/po-workflow/` | `po-output/` |
+| scrum-master | `agents/scrum-master.md` | `skills/sm-workflow/` | `sm-output/` |
+| test-architect | `agents/test-architect.md` | `skills/ta-workflow/` | `ta-output/` |
+| tester | `agents/tester.md` | `skills/test-workflow/` | `test-output/` |
+| code-quality-reviewer | `agents/code-quality-reviewer.md` | `skills/cqr-workflow/` | `cqr-output/` |
+| code-security-reviewer | `agents/code-security-reviewer.md` | `skills/csr-workflow/` | `csr-output/` |
+| technical-analyst | `agents/technical-analyst.md` | `skills/re-workflow/` | `re-output/` |
+| bug-fixer | `agents/bug-fixer.md` | `skills/bf-workflow/` | `bf-output/` |
+
+Keep this mapping consistent across installer scripts, orchestrators, and documentation to avoid path drift.
 
 ---
 
