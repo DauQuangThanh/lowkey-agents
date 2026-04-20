@@ -38,7 +38,22 @@ bash uninstall.sh --target /path/to/my-project
 
 ## Running an agent
 
-Every agent can run in two ways:
+These agents are intended to be installed into your IDE's agent system as subagents or custom agents. In normal use, you run the installed agent definition from your IDE's agent picker / custom-agent UI, and that agent then uses its backing skills and scripts.
+
+The workflow scripts shown below are the backing entry points. Use them when you want to run a workflow directly for local testing, debugging, or CI outside the IDE agent wrapper.
+
+### Normal usage: run the installed subagent / custom agent
+
+After `install.sh` / `install.ps1` copies the files into your target project's agent framework folder, invoke the agent from that IDE's agent experience.
+
+- Claude Code / compatible frameworks: run the installed agent definition from the framework's agent command or picker
+- Cursor / Windsurf / Cline / Roo / similar: run the installed custom agent according to that IDE's agent UI
+
+The exact click-path differs by IDE, but the important point is: users normally run the agent definition, not the `run-all` script directly.
+
+### Direct usage: run the backing workflow scripts
+
+Every workflow also supports two script-level modes:
 
 ```bash
 # Interactive — you answer numbered-choice questions
@@ -49,7 +64,21 @@ bash <SKILL_DIR>/ba-workflow/scripts/run-all.sh --auto
 bash <SKILL_DIR>/ba-workflow/scripts/run-all.sh --auto --answers ./answers.env
 ```
 
-PowerShell equivalents use `-Auto` and `-Answers`. See each agent's `# Auto Mode` section for the canonical answer keys.
+```powershell
+# Interactive
+pwsh <SKILL_DIR>/ba-workflow/scripts/run-all.ps1
+
+# Auto
+pwsh <SKILL_DIR>/ba-workflow/scripts/run-all.ps1 -Auto
+pwsh <SKILL_DIR>/ba-workflow/scripts/run-all.ps1 -Auto -Answers ./answers.env
+```
+
+Notes:
+
+- Most Bash workflows use `--auto` and `--answers`.
+- Most PowerShell workflows expose `-Auto` and `-Answers`; many also accept the shared `--auto` / `--answers` parser internally.
+- Some workflows have extra safety flags. Example: `bug-fixer` auto mode also requires a branch name or dry-run flag.
+- See each agent's `# Auto Mode` section for the canonical answer keys and any agent-specific flags.
 
 ---
 
