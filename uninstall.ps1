@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 #
 # lowkey-agents uninstaller (PowerShell 5.1+, Windows/Cross-platform)
-# Removes 14 agents and 85 skills from 25+ AI coding platforms
+# Removes 14 agents and 87 skills from 25+ AI coding platforms
 #
 # Usage:
 #   .\uninstall.ps1                          # Interactive mode
@@ -80,7 +80,7 @@ function Write-Banner {
     Write-Host ""
     Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
     Write-Host "║         LOWKEY-AGENTS UNINSTALLER.                     ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   Remove 14 Agents + 85 Skills from 25+ AI Platforms   ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   Remove 14 Agents + 87 Skills from 25+ AI Platforms   ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Developed by Dau Quang Thanh                         ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Version 2.0 — Production Ready                       ║" -ForegroundColor $Colors['Cyan']
     Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
@@ -179,6 +179,25 @@ function Get-AgentsSubdir {
     return "agents"
 }
 
+# Copilot variants store agents as <name>.agent.md (not <name>.md)
+function Test-IsCopilotPlatform {
+    param([string]$ConfigDir)
+    return ($ConfigDir -eq '.github' -or $ConfigDir -eq '.copilot')
+}
+
+# Map a Claude source filename (foo.md) to the installed filename for the given platform.
+# Copilot variants rename to foo.agent.md; all other platforms keep foo.md.
+function Get-InstalledFilename {
+    param(
+        [string]$ClaudeFilename,
+        [string]$ConfigDir
+    )
+    if (Test-IsCopilotPlatform $ConfigDir) {
+        return ($ClaudeFilename -replace '\.md$', '.agent.md')
+    }
+    return $ClaudeFilename
+}
+
 function Find-IDEDirs {
     param([string]$TargetPath)
 
@@ -256,12 +275,13 @@ function Remove-Agents {
         }
 
         Get-ChildItem -Path $Script:AgentsSrc -Filter "*.md" -File | ForEach-Object {
-            $agentName = $_.BaseName
-            $targetFile = Join-Path $agentsPath $_.Name
+            $srcFilename = $_.Name
+            $installedFilename = Get-InstalledFilename -ClaudeFilename $srcFilename -ConfigDir $ide
+            $targetFile = Join-Path $agentsPath $installedFilename
 
             if (Test-Path $targetFile) {
                 Remove-Item $targetFile -Force
-                Write-Success "Removed agent: $agentName (from $ide\)"
+                Write-Success "Removed agent: $installedFilename (from $ide\)"
                 $Script:AgentsRemoved++
             }
             else {

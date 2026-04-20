@@ -564,51 +564,12 @@ Append all debts to `test-output/05-test-debts.md`. Track and resolve them in th
 
 ## Failed Test Cases & Bugs
 
-### TC-008 (US-02): User unable to update profile email
+For each failure, link the test case to its canonical bug entry in `test-output/bugs.md` (see Phase 3 schema). Example row:
 
-**Test Case:** TC-008  
-**Story:** US-02 — User Profile Management  
-**Result:** ✗ FAILED
-
-**Bug ID:** BUG-001  
-**Title:** Profile update API returns 500 error when email is changed
-
-**Description:**
-1. Logged in as user@example.com
-2. Clicked "Edit Profile"
-3. Changed email to newemail@example.com
-4. Clicked "Save"
-5. **Expected:** Email updated, success message shown
-6. **Actual:** API error 500, no error message on UI
-
-**Severity:** High / P1 (blocks core user workflow)
-**Priority:** This sprint
-**Reproducibility:** Always
-**Environment:** Staging
-**Assigned To:** [Backend team]
-**Status:** Open
-
-**Environment Details:**
-- Browser: Chrome 120
-- OS: Windows 11
-- Database: PostgreSQL (staging)
-
-**Attachments:** [Screenshot, network logs, API response]
-
----
-
-
-### TC-015 (US-03): Payment processing with international card
-
-**Test Case:** TC-015  
-**Story:** US-03 — Checkout  
-**Result:** ⊗ BLOCKED
-
-**Blocker:** Test credit card data not yet provided by Finance team
-
-**Impact:** Cannot test payment flow with non-US cards until test card numbers are available.
-
-**Unblocked By:** [Owner], ETA [date]
+| Test Case | Story | Result | Bug ID | Title | Severity/Priority |
+|---|---|---|---|---|---|
+| TC-008 | US-02 | ✗ FAILED | BUG-001 | Profile update API returns 500 on email change | High / P1 |
+| TC-015 | US-03 | ⊗ BLOCKED | — | Blocked: no intl. credit-card test data (owner: Finance) | — |
 
 ---
 
@@ -810,92 +771,34 @@ Append all debts to `test-output/05-test-debts.md`. Track and resolve them in th
 
 # Knowledge Base
 
-## Test Types & Levels
+## Test Levels (at a glance)
 
-**Unit Testing**
-- Written by developers, focuses on individual functions/methods
-- Input: requirements, code
-- Output: pass/fail for each unit
-- Goal: catch bugs early, fast feedback
+| Level | Who | Input | Goal |
+|---|---|---|---|
+| Unit | Developers | Code, requirements | Catch bugs early with fast feedback |
+| Integration | Dev/QA | Design, architecture | Find interface + data-consistency issues |
+| System | QA | User stories, acceptance criteria | Verify end-to-end system meets requirements |
+| UAT | Business users | Requirements, stories | Final sign-off before release |
 
-**Integration Testing**
-- Tests how modules work together (APIs, database, services)
-- Input: design, architecture
-- Output: pass/fail for workflows across services
-- Goal: find interface bugs, data consistency issues
+## Severity (Impact) vs Priority (Urgency)
 
-**System Testing**
-- End-to-end tests of the complete system
-- Input: user stories, acceptance criteria
-- Output: pass/fail for each user scenario
-- Goal: verify system meets requirements
+**Severity:** Critical = system down / data loss / security breach; High = major feature broken, workaround exists; Medium = partial break, doesn't block workflow; Low = cosmetic.
 
-**User Acceptance Testing (UAT)**
-- Business users validate the system meets their needs
-- Input: requirements, user stories
-- Output: accept / request changes
-- Goal: final sign-off before release
+**Priority:** P0 = fix before any release (CTO/Release Lead); P1 = fix this sprint (Eng Lead); P2 = next sprint (PM); P3 = backlog.
 
----
-
-
-## Severity & Priority Matrix
-
-### Severity (Impact on Users)
-
-| Level | Definition | Example |
-|---|---|---|
-| **Critical** | System unavailable, data loss, security breach | Login broken, payment lost, SQL injection |
-| **High** | Major feature broken, workaround exists | Report export fails, slow performance |
-| **Medium** | Feature partially broken, does not block workflow | UI misaligned, help text wrong |
-| **Low** | Cosmetic or nice-to-have issue | Typo, button color |
-
-### Priority (Fix Urgency)
-
-| Level | When | Owner Decision |
-|---|---|---|
-| **P0 / Immediate** | Fix before any release | CTO / Release Lead |
-| **P1 / This Sprint** | Fix in current sprint | Engineering Lead |
-| **P2 / Next Sprint** | Fix in next iteration | Product Manager |
-| **P3 / Backlog** | Fix when capacity available | Backlog grooming |
-
----
-
+Severity ≠ Priority. A critical bug in a low-priority feature may be deferred.
 
 ## Testing Techniques
 
-**Boundary Value Analysis**
-- Test values at the edges of valid ranges
-- Example: User age field → test 0, 1, 99, 100, 120, 121
+- **Boundary Value Analysis** — test edges (age field → 0, 1, 99, 100, 120, 121).
+- **Equivalence Partitioning** — divide inputs into valid/invalid classes (email → `user@domain.com` vs `no@`, empty).
+- **Error Guessing** — experience-driven edge cases (concurrency, timeouts, permission changes).
+- **State Transition** — workflows across states (Order → Pending → Shipped → Delivered).
+- **Exploratory** — free-form, creative probing to discover the unexpected.
 
-**Equivalence Partitioning**
-- Divide inputs into valid and invalid classes
-- Example: Email → valid (user@domain.com), invalid (no@, empty)
+## ISTQB Glossary (plain English)
 
-**Error Guessing**
-- Test common mistakes and edge cases from experience
-- Example: Concurrent requests, network timeouts, permission changes
-
-**State Transition Testing**
-- Test workflows that move through different states
-- Example: Order → Pending → Shipped → Delivered
-
-**Exploratory Testing**
-- Free-form testing to discover unexpected issues
-- Goal: break the system creatively
-
----
-
-
-## ISTQB Glossary (Plain English)
-
-- **Test Case:** A set of conditions (given/when/then) that validates one aspect of the system.
-- **Test Suite:** A collection of test cases for a feature or system.
-- **Test Coverage:** Percentage of code, requirements, or workflows that are tested. Goal: 80%+.
-- **Pass Rate:** Percentage of test cases that passed on first run. Goal: 90%+.
-- **Defect / Bug:** A discrepancy between expected and actual behavior.
-- **Regression Test:** Tests that verify a previous fix did not break anything else.
-- **Smoke Test:** Quick sanity check that the system is basically working (builds, deploys, core flows).
+Test Case = given/when/then validating one aspect. Test Suite = collection for a feature. Coverage = % of code/requirements/workflows tested (target 80%+). Pass Rate = % passing first run (target 90%+). Defect = expected vs actual mismatch. Regression Test = verifies a fix didn't break something else. Smoke Test = quick sanity check that core flows work.
 
 ---
 
@@ -914,24 +817,9 @@ When working in this agent:
 
 # Prerequisites & Platform Notes
 
-### Bash Scripts
-
-- Require Bash 3.2+ (default on macOS, Linux)
-- No external dependencies (standard Unix utilities only)
-- File paths resolved relative to script location (`SCRIPT_DIR`)
-- Output dir defaults to `./test-output` or use `TEST_OUTPUT_DIR` env var
-
-### PowerShell Scripts
-
-- Require PowerShell 5.1+ (Windows 10+, Windows Server 2016+)
-- Core 7+ supported (cross-platform)
-- Output dir defaults to `./test-output` or use `$env:TEST_OUTPUT_DIR`
-
-### If Scripts Unavailable
-
-- Wrong platform (e.g. Bash script on Windows without WSL) → fall back to interactive questioning
-- Permissions issue → ask user to copy script to a writable location
-- Tool not found (e.g. `grep`) → not critical, use built-in question prompts instead
+- **Bash scripts:** Bash 3.2+ (default on macOS/Linux); no external deps; paths resolved from `SCRIPT_DIR`; output dir defaults to `./test-output` or `$TEST_OUTPUT_DIR`.
+- **PowerShell scripts:** PS 5.1+ (Windows 10+) or PS Core 7+ (cross-platform); output dir via `$env:TEST_OUTPUT_DIR`.
+- **Scripts unavailable** (wrong platform, permissions, missing tools): fall back to interactive questioning and hand-write the markdown using the templates above.
 
 ---
 

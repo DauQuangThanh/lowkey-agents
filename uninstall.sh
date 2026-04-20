@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # lowkey-agents uninstaller (Bash 3.2+, macOS/Linux)
-# Removes 14 agents and 85 skills from 25+ AI coding platforms
+# Removes 14 agents and 87 skills from 25+ AI coding platforms
 #
 # Usage:
 #   ./uninstall.sh                          # Interactive mode
@@ -72,7 +72,7 @@ print_banner() {
     printf "\n${BOLD}${CYAN}"
     printf "╔════════════════════════════════════════════════════════╗\n"
     printf "║         LOWKEY-AGENTS UNINSTALLER                      ║\n"
-    printf "║   Remove 14 Agents + 85 Skills from 25+ AI Platforms   ║\n"
+    printf "║   Remove 14 Agents + 87 Skills from 25+ AI Platforms   ║\n"
     printf "║   Developed by Dau Quang Thanh                         ║\n"
     printf "║   Version 2.0 — Production Ready                       ║\n"
     printf "╚════════════════════════════════════════════════════════╝\n"
@@ -215,6 +215,24 @@ get_agents_subdir() {
     echo "agents"
 }
 
+# Copilot variants store agents as <name>.agent.md (not <name>.md)
+is_copilot_platform() {
+    local config_dir="$1"
+    [[ "$config_dir" == ".github" || "$config_dir" == ".copilot" ]]
+}
+
+# Map a Claude source filename (foo.md) to the installed filename for the given platform.
+# Copilot variants rename to foo.agent.md; all other platforms keep foo.md.
+installed_filename_for_platform() {
+    local claude_filename="$1"
+    local config_dir="$2"
+    if is_copilot_platform "$config_dir"; then
+        echo "${claude_filename%.md}.agent.md"
+    else
+        echo "$claude_filename"
+    fi
+}
+
 # Show what will be removed
 show_removal_summary() {
     local target="$1"
@@ -259,6 +277,7 @@ confirm_removal() {
 }
 
 # Remove agents from all found IDE directories
+# Uses installed_filename_for_platform() so that .github/.copilot look for foo.agent.md
 remove_agents() {
     local target="$1"
     shift
@@ -273,12 +292,13 @@ remove_agents() {
         fi
 
         for agent_file in "$AGENTS_SRC"/*.md; do
-            local filename=$(basename "$agent_file")
-            local target_file="$agents_path/$filename"
+            local src_filename=$(basename "$agent_file")
+            local installed_filename=$(installed_filename_for_platform "$src_filename" "$ide_dir")
+            local target_file="$agents_path/$installed_filename"
 
             if [[ -f "$target_file" ]]; then
                 rm "$target_file"
-                print_success "Removed agent: $filename (from $ide_dir/)"
+                print_success "Removed agent: $installed_filename (from $ide_dir/)"
                 ((AGENTS_REMOVED++))
             else
                 ((AGENTS_NOTFOUND++))

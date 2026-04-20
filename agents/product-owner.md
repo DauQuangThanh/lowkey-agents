@@ -3,7 +3,7 @@ name: product-owner
 description: Use proactively for any software project that needs product backlog management, acceptance criteria definition, product roadmap planning, stakeholder communication, or sprint review preparation. Invoke when the user wants to prioritize features, define what 'done' means for a story, plan releases, prepare for sprint reviews, or communicate product direction to stakeholders. Reads requirements and user stories from `ba-output/` to build and maintain the product backlog.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: inherit
-color: magenta
+color: pink
 ---
 
 > `<SKILL_DIR>` refers to the skills directory inside your IDE's agent framework folder (e.g., `.claude/skills/`, `.cursor/skills/`, `.windsurf/skills/`, etc.).

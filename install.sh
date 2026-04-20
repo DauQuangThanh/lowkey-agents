@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # lowkey-agents installer (Bash 3.2+, macOS/Linux)
-# Installs 14 agents and 85 skills to 25+ AI coding platforms
+# Installs 14 agents and 87 skills to 25+ AI coding platforms
 #
 # Usage:
 #   ./install.sh                          # Interactive mode
@@ -79,7 +79,7 @@ print_banner() {
     printf "\n${BOLD}${CYAN}"
     printf "╔════════════════════════════════════════════════════════╗\n"
     printf "║           LOWKEY-AGENTS INSTALLER                      ║\n"
-    printf "║   14 Agents + 85 Skills for 25+ AI Coding Platforms    ║\n"
+    printf "║   14 Agents + 87 Skills for 25+ AI Coding Platforms    ║\n"
     printf "║   Developed by Dau Quang Thanh                         ║\n"
     printf "║   Version 2.0 — Production Ready                       ║\n"
     printf "╚════════════════════════════════════════════════════════╝\n"
@@ -328,7 +328,132 @@ get_agents_subdir() {
     echo "agents"
 }
 
-# Copy agents to target
+# ─── GitHub Copilot emit helpers ─────────────────────────────────────────────
+#
+# Copilot Custom Agents require a transformed file format:
+#   - Filename:  foo.md  →  foo.agent.md
+#   - Strip Claude-only frontmatter: name:, color:, model: inherit
+#   - tools:    PascalCase comma-string  →  lowercase YAML/JSON array
+#   - Add optional  target: vscode | github-copilot
+#   - Body must be ≤ 30,000 chars
+#
+# Reference:
+#   https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents
+#   https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli
+
+# Is this config dir a Copilot variant?
+is_copilot_platform() {
+    local config_dir="$1"
+    [[ "$config_dir" == ".github" || "$config_dir" == ".copilot" ]]
+}
+
+# Return the Copilot `target:` value for a given config dir (empty = omit field)
+get_copilot_target() {
+    local config_dir="$1"
+    case "$config_dir" in
+        .github)  echo "vscode" ;;           # VSCode / IDE variant
+        .copilot) echo "" ;;                 # CLI — no target restriction
+        *)        echo "" ;;
+    esac
+}
+
+# Map a Claude agent filename to the Copilot-expected filename
+#   business-analyst.md  →  business-analyst.agent.md
+copilot_filename() {
+    local claude_filename="$1"
+    echo "${claude_filename%.md}.agent.md"
+}
+
+# Transform a Claude agent file into Copilot format
+# Args: <src_file> <dst_file> <target_value_or_empty>
+transform_to_copilot_format() {
+    local src="$1"
+    local dst="$2"
+    local copilot_target="$3"
+
+    awk -v copilot_target="$copilot_target" '
+    BEGIN { state = "pre_fm" }
+
+    # Opening frontmatter delimiter
+    /^---[[:space:]]*$/ && state == "pre_fm" {
+        print; state = "in_fm"; next
+    }
+
+    # Closing frontmatter delimiter — inject target: before closing
+    /^---[[:space:]]*$/ && state == "in_fm" {
+        if (copilot_target != "") print "target: " copilot_target
+        print; state = "post_fm"; next
+    }
+
+    # Inside frontmatter — drop Claude-only fields, transform tools
+    state == "in_fm" {
+        if ($0 ~ /^name:/) next
+        if ($0 ~ /^color:/) next
+        if ($0 ~ /^model:[[:space:]]*inherit[[:space:]]*$/) next
+
+        if ($0 ~ /^tools:/) {
+            val = $0
+            sub(/^tools:[[:space:]]*/, "", val)
+            gsub(/\[|\]/, "", val)
+            n = split(val, arr, /,[[:space:]]*/)
+            out = "tools: ["
+            emitted = 0
+            for (i = 1; i <= n; i++) {
+                tool = arr[i]
+                gsub(/^[[:space:]"'\'']+|[[:space:]"'\'']+$/, "", tool)
+                if (tool != "") {
+                    if (emitted > 0) out = out ", "
+                    out = out "\"" tolower(tool) "\""
+                    emitted++
+                }
+            }
+            out = out "]"
+            print out
+            next
+        }
+        print; next
+    }
+
+    # Body — pass through
+    { print }
+    ' "$src" > "$dst"
+}
+
+# Return body char count (everything after the second --- line)
+# Used to enforce Copilot's 30,000-char cap
+copilot_body_chars() {
+    local file="$1"
+    awk '
+        BEGIN { state = "pre_fm"; total = 0 }
+        /^---[[:space:]]*$/ && state == "pre_fm" { state = "in_fm"; next }
+        /^---[[:space:]]*$/ && state == "in_fm"  { state = "post_fm"; next }
+        state == "post_fm" { total += length($0) + 1 }
+        END { print total }
+    ' "$file"
+}
+
+# Write one agent file to its target, applying Copilot transform if needed
+# Args: <src> <dst> <is_copilot 0|1> <copilot_target_value>
+install_one_agent_file() {
+    local src="$1"
+    local dst="$2"
+    local is_copilot="$3"
+    local copilot_target="$4"
+
+    if [[ "$is_copilot" -eq 1 ]]; then
+        transform_to_copilot_format "$src" "$dst" "$copilot_target"
+        # Enforce the 30,000-char Copilot body cap
+        local body_chars
+        body_chars=$(copilot_body_chars "$dst")
+        if [[ "$body_chars" -gt 30000 ]]; then
+            print_warning "  Body exceeds Copilot 30k cap ($body_chars chars) — Copilot may reject this file"
+        fi
+    else
+        cp "$src" "$dst" 2>/dev/null
+    fi
+}
+
+# Copy agents to target (applies Copilot transform for .github / .copilot)
 copy_agents() {
     local target="$1"
     local ide_dir="$2"
@@ -338,34 +463,47 @@ copy_agents() {
     local agents_installed=0
     local agents_skipped=0
 
+    # Copilot platforms need filename rename + frontmatter transform
+    local is_copilot=0
+    local copilot_target=""
+    if is_copilot_platform "$ide_dir"; then
+        is_copilot=1
+        copilot_target=$(get_copilot_target "$ide_dir")
+    fi
+
     mkdir -p "$target_agents" 2>/dev/null
 
     for agent_file in "$AGENTS_SRC"/*.md; do
         local filename=$(basename "$agent_file")
-        local target_file="$target_agents/$filename"
+        local install_filename="$filename"
+        if [[ "$is_copilot" -eq 1 ]]; then
+            install_filename=$(copilot_filename "$filename")
+        fi
+        local target_file="$target_agents/$install_filename"
+        local display_name="${filename%.md}"
 
         if [[ -f "$target_file" ]]; then
-            local response=$(ask_overwrite "$filename" "$all_overwrite")
+            local response=$(ask_overwrite "$install_filename" "$all_overwrite")
             case "$response" in
                 all)
                     all_overwrite="all"
-                    cp "$agent_file" "$target_file" 2>/dev/null
-                    print_success "Installed agent: ${filename%.md}"
+                    install_one_agent_file "$agent_file" "$target_file" "$is_copilot" "$copilot_target"
+                    print_success "Installed agent: $display_name"
                     ((agents_installed++))
                     ;;
                 [yY][eE][sS]|[yY])
-                    cp "$agent_file" "$target_file" 2>/dev/null
-                    print_success "Installed agent: ${filename%.md}"
+                    install_one_agent_file "$agent_file" "$target_file" "$is_copilot" "$copilot_target"
+                    print_success "Installed agent: $display_name"
                     ((agents_installed++))
                     ;;
                 *)
-                    print_warning "Skipped agent: ${filename%.md}"
+                    print_warning "Skipped agent: $display_name"
                     ((agents_skipped++))
                     ;;
             esac
         else
-            cp "$agent_file" "$target_file" 2>/dev/null
-            print_success "Installed agent: ${filename%.md}"
+            install_one_agent_file "$agent_file" "$target_file" "$is_copilot" "$copilot_target"
+            print_success "Installed agent: $display_name"
             ((agents_installed++))
         fi
     done

@@ -1,17 +1,9 @@
 ---
 name: devops
-description: "Use proactively for any software project that needs CI/CD pipeline design, infrastructure-as-code planning, containerization strategy, monitoring/observability setup, deployment strategy, or environment management. Invoke when the user wants to automate builds/deployments, define infrastructure, set up monitoring, plan container orchestration, or manage multiple environments. Reads architecture decisions from `arch-output/` and development setup from `dev-output/`. Audience: DevOps, platform, and SRE engineers. Numbered-choice prompts use platform/cloud vocabulary without inline definitions."
-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - WebSearch
-  - WebFetch
+description: Use proactively for any software project that needs CI/CD pipeline design, infrastructure-as-code planning, containerization strategy, monitoring/observability setup, deployment strategy, or environment management. Invoke when the user wants to automate builds/deployments, define infrastructure, set up monitoring, plan container orchestration, or manage multiple environments. Reads architecture decisions from `arch-output/` and development setup from `dev-output/`. Audience: DevOps, platform, and SRE engineers. Numbered-choice prompts use platform/cloud vocabulary without inline definitions.
+tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 model: inherit
-color: white
+color: cyan
 ---
 
 > `<SKILL_DIR>` refers to the skills directory inside your IDE's agent framework folder (e.g., `.claude/skills/`, `.cursor/skills/`, `.windsurf/skills/`, etc.).
@@ -576,19 +568,9 @@ spec:
 
 # Knowledge Base
 
-## **12-Factor App Principles**
-1. Codebase: One codebase tracked in version control, deployed to many environments.
-2. Dependencies: Explicitly declare and isolate dependencies (Dockerfile, requirements.txt, go.mod).
-3. Config: Store environment-specific config in environment variables.
-4. Backing services: Treat databases, caches, message brokers as attached resources.
-5. Build/run separation: Strictly separate build (compile, package) from run (execute).
-6. Stateless processes: App processes are stateless; state lives in persistent backing services.
-7. Port binding: Web app is self-contained (exports HTTP via port binding).
-8. Concurrency: Process types scale independently (web, worker, job scheduler).
-9. Disposability: Fast startup, graceful shutdown.
-10. Dev/prod parity: Keep development, staging, and production as similar as possible.
-11. Logs: App writes logs to stdout; environment handles collection, storage, analysis.
-12. Admin tasks: One-off tasks (migrations, backups) run in identical environment, via process runner.
+## **12-Factor App Principles** (condensed)
+
+One codebase in VCS deployed to many envs; explicit dependency declaration; config in env vars; backing services as attached resources; strict build/run separation; stateless processes (state in backing services); self-contained port binding; independently scalable process types; fast startup + graceful shutdown (disposability); dev/prod parity; logs to stdout (env handles collection); one-off admin tasks run in identical env.
 
 ## **DORA Metrics** (DevOps Research and Assessment)
 - **Deployment Frequency**: How often do you release? (Daily, weekly, monthly?)
@@ -606,31 +588,14 @@ Higher scores in all four metrics indicate mature DevOps practices.
 
 Monitor all four; alert on deviations from baseline.
 
-## **Deployment Patterns Explained**
+## **Deployment Patterns (at a glance)**
 
-### **Rolling Deployment**
-- Gradually replace old instances with new ones.
-- Pros: No downtime, easy rollback (usually).
-- Cons: Temporary version mismatch, slower.
-- Use: Stateless services, when you can tolerate transient degradation.
-
-### **Blue-Green Deployment**
-- Run two identical production environments; switch traffic instantly.
-- Pros: Zero downtime, instant rollback.
-- Cons: 2x infrastructure cost, database schema coordination required.
-- Use: Mission-critical services, when downtime is unacceptable.
-
-### **Canary Deployment**
-- Gradually shift traffic % to new version.
-- Pros: Real-world testing before full rollout, quick rollback.
-- Cons: Complex traffic management, requires observability.
-- Use: High-risk changes, when you want to catch issues early.
-
-### **Recreate Deployment**
-- Stop all old instances, start new ones.
-- Pros: Simple.
-- Cons: Downtime, slow recovery.
-- Use: Development, rare emergency fixes.
+| Pattern | Mechanism | Pros | Cons | Use when |
+|---|---|---|---|---|
+| Rolling | Gradually replace old instances with new | No downtime, easy rollback | Temporary version mismatch, slower | Stateless services, transient degradation OK |
+| Blue-Green | Two identical prod envs; switch traffic instantly | Zero downtime, instant rollback | 2x infra cost, schema coordination | Mission-critical, no downtime tolerable |
+| Canary | Gradually shift traffic % to new version | Real-world test, quick rollback | Complex traffic mgmt, needs observability | High-risk changes |
+| Recreate | Stop all old, start all new | Simple | Downtime, slow recovery | Dev, rare emergency fixes |
 
 ## **Infrastructure-as-Code Best Practices**
 
@@ -750,26 +715,6 @@ When a question stalls, try one of these in order:
 ---
 
 
-# How This Agent Helps
+# Result
 
-- **For architects**: I turn your topology and cloud strategy into executable CI/CD, IaC, and operational plans.
-- **For developers**: I design the paths to production, environments, and monitoring that enable you to ship with confidence.
-- **For DevOps engineers**: I provide structured templates, phase-by-phase planning, and debt tracking to keep the operational backbone healthy.
-- **For startups**: I help you ship fast without accumulating dangerous technical debt.
-- **For enterprises**: I help you scale from single-region monolith to global, multi-cloud, high-reliability systems.
-
----
-
-
-# Summary
-
-Use the **devops agent** proactively when:
-- A new project is kicking off and needs CI/CD, infrastructure, and environment design.
-- You're migrating to a new cloud provider or containerization platform.
-- You're scaling from one team to multiple teams and need operational structure.
-- You're setting up monitoring, logging, or disaster recovery.
-- You're analyzing technical debt and need a deployment strategy overhaul.
-
-The agent works best with clear input from architecture and development teams, but can start from a blank slate with user interviews.
-
-**Result**: A production-ready DevOps handbook with actionable templates, decision rationale, and a debt backlog to guide implementation.
+A production-ready DevOps handbook with actionable templates, decision rationale, and a debt backlog to guide implementation. Works best with clear input from architecture and development teams, but can start from a blank slate with user interviews.

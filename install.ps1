@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 #
 # lowkey-agents installer (PowerShell 5.1+, Windows/Cross-platform)
-# Installs 14 agents and 85 skills to 25+ AI coding platforms
+# Installs 14 agents and 87 skills to 25+ AI coding platforms
 #
 # Usage:
 #   .\install.ps1                          # Interactive mode
@@ -79,7 +79,7 @@ function Write-Banner {
     Write-Host ""
     Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor $Colors['Cyan']
     Write-Host "║           LOWKEY-AGENTS INSTALLER                      ║" -ForegroundColor $Colors['Cyan']
-    Write-Host "║   14 Agents + 85 Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
+    Write-Host "║   14 Agents + 87 Skills for 25+ AI Coding Platforms    ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Developed by Dau Quang Thanh                         ║" -ForegroundColor $Colors['Cyan']
     Write-Host "║   Version 2.0 — Production Ready                       ║" -ForegroundColor $Colors['Cyan']
     Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor $Colors['Cyan']
@@ -289,6 +289,112 @@ function Get-AgentsSubdir {
     return "agents"
 }
 
+# ─── GitHub Copilot emit helpers ─────────────────────────────────────────────
+#
+# Copilot Custom Agents require a transformed file format:
+#   - Filename:  foo.md  →  foo.agent.md
+#   - Strip Claude-only frontmatter: name:, color:, model: inherit
+#   - tools:    PascalCase comma-string  →  lowercase JSON array
+#   - Add optional  target: vscode | github-copilot
+#   - Body must be ≤ 30,000 chars
+#
+# Reference:
+#   https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents
+#   https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli
+
+function Test-IsCopilotPlatform {
+    param([string]$ConfigDir)
+    return ($ConfigDir -eq '.github' -or $ConfigDir -eq '.copilot')
+}
+
+function Get-CopilotTarget {
+    param([string]$ConfigDir)
+    switch ($ConfigDir) {
+        '.github'  { return 'vscode' }       # VSCode / IDE variant
+        '.copilot' { return '' }             # CLI — no target restriction
+        default    { return '' }
+    }
+}
+
+function Get-CopilotFilename {
+    param([string]$ClaudeFilename)
+    # business-analyst.md → business-analyst.agent.md
+    return ($ClaudeFilename -replace '\.md$', '.agent.md')
+}
+
+function ConvertTo-CopilotFormat {
+    param(
+        [string]$SrcPath,
+        [string]$DstPath,
+        [string]$CopilotTarget
+    )
+
+    $lines = Get-Content -Path $SrcPath -Encoding UTF8
+    $out = New-Object System.Collections.Generic.List[string]
+    $state = 'pre_fm'
+
+    foreach ($line in $lines) {
+        if ($line -match '^---\s*$') {
+            if ($state -eq 'pre_fm') {
+                $out.Add($line)
+                $state = 'in_fm'
+                continue
+            }
+            elseif ($state -eq 'in_fm') {
+                if (-not [string]::IsNullOrEmpty($CopilotTarget)) {
+                    $out.Add("target: $CopilotTarget")
+                }
+                $out.Add($line)
+                $state = 'post_fm'
+                continue
+            }
+        }
+
+        if ($state -eq 'in_fm') {
+            # Drop Claude-only fields
+            if ($line -match '^name:')                     { continue }
+            if ($line -match '^color:')                    { continue }
+            if ($line -match '^model:\s*inherit\s*$')      { continue }
+
+            # Transform tools: PascalCase CSV → lowercase JSON array
+            if ($line -match '^tools:') {
+                $val = $line -replace '^tools:\s*', ''
+                $val = $val -replace '[\[\]]', ''
+                $parts = $val -split '\s*,\s*'
+                $clean = @()
+                foreach ($p in $parts) {
+                    $t = $p.Trim().Trim('"', "'")
+                    if ($t -ne '') { $clean += '"' + $t.ToLower() + '"' }
+                }
+                $out.Add('tools: [' + ($clean -join ', ') + ']')
+                continue
+            }
+        }
+
+        $out.Add($line)
+    }
+
+    # Write with LF endings (not CRLF) to stay consistent with Claude source
+    [System.IO.File]::WriteAllText($DstPath, ($out -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
+}
+
+function Get-CopilotBodyCharCount {
+    param([string]$FilePath)
+    $lines = Get-Content -Path $FilePath -Encoding UTF8
+    $state = 'pre_fm'
+    $total = 0
+    foreach ($line in $lines) {
+        if ($line -match '^---\s*$') {
+            if ($state -eq 'pre_fm')      { $state = 'in_fm'; continue }
+            elseif ($state -eq 'in_fm')   { $state = 'post_fm'; continue }
+        }
+        if ($state -eq 'post_fm') {
+            $total += $line.Length + 1   # +1 for newline
+        }
+    }
+    return $total
+}
+
 function Get-DisplayName {
     param([string]$ConfigDir)
 
@@ -358,6 +464,26 @@ function Ask-Overwrite {
     return $response.ToLower()
 }
 
+function Install-OneAgentFile {
+    param(
+        [string]$SrcPath,
+        [string]$DstPath,
+        [bool]$IsCopilot,
+        [string]$CopilotTarget
+    )
+
+    if ($IsCopilot) {
+        ConvertTo-CopilotFormat -SrcPath $SrcPath -DstPath $DstPath -CopilotTarget $CopilotTarget
+        $bodyChars = Get-CopilotBodyCharCount -FilePath $DstPath
+        if ($bodyChars -gt 30000) {
+            Write-Warning-Custom "  Body exceeds Copilot 30k cap ($bodyChars chars) — Copilot may reject this file"
+        }
+    }
+    else {
+        Copy-Item $SrcPath $DstPath -Force
+    }
+}
+
 function Copy-Agents {
     param(
         [string]$TargetPath,
@@ -371,33 +497,39 @@ function Copy-Agents {
         New-Item -Path $targetAgents -ItemType Directory -Force | Out-Null
     }
 
+    # Detect Copilot target — applies filename rename + frontmatter transform
+    $isCopilot = Test-IsCopilotPlatform $IDEDir
+    $copilotTarget = if ($isCopilot) { Get-CopilotTarget $IDEDir } else { '' }
+
     $agentsInstalled = 0
     $agentsSkipped = 0
     $allOverwrite = $false
 
     Get-ChildItem -Path $Script:AgentsSrc -Filter "*.md" -File | ForEach-Object {
         $agentFile = $_
-        $targetFile = Join-Path $targetAgents $agentFile.Name
+        $installFilename = if ($isCopilot) { Get-CopilotFilename $agentFile.Name } else { $agentFile.Name }
+        $targetFile = Join-Path $targetAgents $installFilename
+        $displayName = $agentFile.BaseName
 
         if (Test-Path $targetFile) {
-            $response = Ask-Overwrite $agentFile.Name ([ref]$allOverwrite)
+            $response = Ask-Overwrite $installFilename ([ref]$allOverwrite)
 
             if ($response -eq "all" -or $response -eq "y" -or $response -eq "yes") {
                 if ($response -eq "all") {
                     $allOverwrite = $true
                 }
-                Copy-Item $agentFile.FullName $targetFile -Force
-                Write-Success "Installed agent: $($agentFile.BaseName)"
+                Install-OneAgentFile -SrcPath $agentFile.FullName -DstPath $targetFile -IsCopilot $isCopilot -CopilotTarget $copilotTarget
+                Write-Success "Installed agent: $displayName"
                 $agentsInstalled++
             }
             else {
-                Write-Warning-Custom "Skipped agent: $($agentFile.BaseName)"
+                Write-Warning-Custom "Skipped agent: $displayName"
                 $agentsSkipped++
             }
         }
         else {
-            Copy-Item $agentFile.FullName $targetFile
-            Write-Success "Installed agent: $($agentFile.BaseName)"
+            Install-OneAgentFile -SrcPath $agentFile.FullName -DstPath $targetFile -IsCopilot $isCopilot -CopilotTarget $copilotTarget
+            Write-Success "Installed agent: $displayName"
             $agentsInstalled++
         }
     }

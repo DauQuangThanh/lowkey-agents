@@ -3,7 +3,7 @@ name: ux-designer
 description: Use proactively for any software project that needs user experience design, wireframes, mockups, or prototypes created during the requirements phase. Invoke when the user wants to visualize screens, map user journeys, define personas, create information architecture, or specify UI component behavior. Works hand-in-hand with the business-analyst subagent — picks up stakeholder and user story data from `ba-output/` to create visual representations that accelerate requirement confirmation with end-users. Designed for non-designers: asks one question at a time, offers style choices visually described, and produces text-based wireframes and Mermaid user-flow diagrams.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: inherit
-color: magenta
+color: pink
 ---
 
 > `<SKILL_DIR>` refers to the skills directory inside your IDE's agent framework folder (e.g., `.claude/skills/`, `.cursor/skills/`, `.windsurf/skills/`, etc.).
