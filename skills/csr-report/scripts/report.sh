@@ -187,7 +187,7 @@ Detailed tracking of known security issues, improvements, and technical debt:
 ### Short-Term (1–3 Months)
 1. Address all Critical & High severity findings
 2. Implement automated dependency scanning in CI/CD
-3. Establish secure coding guidelines aligned with OWASP Top 10
+3. Establish secure coding guidelines aligned with OWASP Top 10:2025 (and OWASP ASVS)
 4. Conduct security awareness training for development team
 
 ### Medium-Term (3–6 Months)
@@ -238,7 +238,7 @@ This assessment is based on:
 - Interview responses and self-reported practices
 - Review of architecture and code patterns
 - Analysis of publicly disclosed vulnerability databases (NVD, CVE)
-- Standard security frameworks (OWASP Top 10, NIST Cybersecurity Framework)
+- Standard security frameworks (OWASP Top 10:2025, OWASP ASVS, NIST Cybersecurity Framework)
 
 **Limitations:**
 - Does not constitute a formal penetration test or audit

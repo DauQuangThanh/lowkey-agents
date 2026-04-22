@@ -25,7 +25,7 @@ Use this orchestrator when:
 
 Executes all 5 phases of the Code Security Reviewer workflow in order:
 
-1. **Phase 1: Vulnerability Assessment** — OWASP Top 10 review, threat modeling, incident history
+1. **Phase 1: Vulnerability Assessment** — OWASP Top 10:2025 review (incl. A10 Mishandling of Exceptional Conditions, A03 Software Supply Chain Failures), threat modeling, incident history
 2. **Phase 2: Authentication & Authorization Review** — auth mechanisms, MFA, RBAC, session/token handling
 3. **Phase 3: Data Protection & Privacy Review** — sensitive data types, encryption at rest/in transit, compliance (GDPR/HIPAA/PCI-DSS/SOC2)
 4. **Phase 4: Dependency & Supply Chain Audit** — package managers, scanning tools, vulnerable dependencies, license compliance

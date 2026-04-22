@@ -1,6 +1,6 @@
 ---
 name: csr-dependency-audit
-description: Phase 4 of the Code Security Reviewer workflow — package manager inventory, dependency scanning tool assessment, vulnerable dependency identification, license compliance review, supply chain security practices (lock files, integrity checks, provenance), and patch management cadence. Generates dependency audit report.
+description: Phase 4 of the Code Security Reviewer workflow — the primary assessment for OWASP A03:2025 Software Supply Chain Failures. Covers package manager inventory, SCA/dependency scanning tools, vulnerable (direct and transitive) dependency identification, SBOM generation, license compliance, supply chain security practices (signed packages, lock files, integrity checks, provenance/SLSA, staged rollouts), build-pipeline and developer-tooling hardening, and patch management cadence. Generates dependency / supply chain audit report.
 license: MIT
 compatibility: Requires Bash 3.2+ or PowerShell 5.1+/7+. No network access required.
 allowed-tools: Bash
@@ -22,14 +22,16 @@ This is the fourth phase of the Code Security Reviewer workflow. Run it when:
 
 ## What it captures
 
-6 main assessment areas:
+Assessment areas (aligned with OWASP A03:2025 Software Supply Chain Failures):
 
 1. Package managers in use (npm, pip, maven, gradle, rubygems, nuget, go, cargo, composer)
-2. Dependency scanning tool (Snyk, Dependabot, Trivy, OWASP Dependency-Check, none)
-3. Known vulnerable dependencies
-4. License compliance monitoring
-5. Supply chain security measures (lock files, integrity checks, provenance verification)
-6. Dependency update & patch cadence
+2. SCA / dependency scanning tool (Snyk, Dependabot, Trivy, OWASP Dependency-Check, OWASP Dependency-Track, none)
+3. Known vulnerable dependencies (direct **and** transitive)
+4. SBOM — generation (SPDX, CycloneDX), coverage, update cadence
+5. License compliance monitoring
+6. Supply chain security measures — signed packages, lock files, hash/integrity checks, provenance (SLSA, in-toto), trusted registries, staged rollouts / canary deployments
+7. Build-pipeline & developer-tooling hardening — MFA on code repos, protected branches, environment-scoped secrets, signed builds, IaC under version control, IDE/CI/CD patching
+8. Dependency update & patch cadence
 
 ## How to invoke
 
@@ -43,4 +45,4 @@ pwsh <SKILL_DIR>/csr-dependency-audit/scripts/dependency-audit.ps1
 
 ## Output
 
-`csr-output/04-dependency-audit.md` — dependency & supply chain audit with package manager inventory, scanning tool status, vulnerable dependency list, license compliance status, supply chain integrity evaluation, and patch management recommendations.
+`csr-output/04-dependency-audit.md` — dependency & supply chain audit with package manager inventory, SCA tool status, vulnerable-dependency list (direct and transitive), SBOM coverage, license compliance status, signing/provenance/build-pipeline integrity evaluation, and patch management recommendations. Primary evidence for A03:2025 Software Supply Chain Failures findings.
